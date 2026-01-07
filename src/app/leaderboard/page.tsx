@@ -8,7 +8,7 @@ import { formatCompactNumber } from '@/lib/utils/helpers';
 import { VALIDATED_DATA_SOURCES } from '@/lib/data-sources/validation';
 
 async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/leaderboard`, {
+    const res = await fetch('/api/leaderboard', {
         cache: 'no-store',
     });
     if (!res.ok) return [];

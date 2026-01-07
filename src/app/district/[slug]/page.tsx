@@ -7,8 +7,10 @@ import { formatCompactNumber, formatNumber, getAQICategory } from '@/lib/utils/h
 
 async function getDistrictDetail(slug: string): Promise<DistrictDetail | null> {
     try {
+        // For server components, use absolute URL with environment variable or fallback
+        // In production, this should be set to the actual domain
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                       (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+                       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
         
         const res = await fetch(`${baseUrl}/api/districts/${slug}`, {
             cache: 'no-store',
