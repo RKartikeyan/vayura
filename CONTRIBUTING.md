@@ -172,6 +172,8 @@ Remove: Unused Prisma dependencies
 - [ ] Multilingual support (Hindi, regional languages)
 - [ ] Social sharing features
 - [ ] Email notifications
+- [ ] Legal & Privacy compliance updates
+- [ ] NGO Donation verification workflow improvements
 
 ### Infrastructure
 

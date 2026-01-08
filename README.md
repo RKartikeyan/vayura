@@ -18,9 +18,10 @@ Vayura is an open-source web application that estimates district-level oxygen de
 - **Environmental Health Card**: AQI, soil quality, disaster frequency, population data
 - **AI-Powered Data Fetching**: Uses Gemini AI to intelligently aggregate data from multiple government sources
 - **Tree Contribution System**: Upload tree plantation photos analyzed by AI for environmental impact
-- **NGO Integration**: Donate trees through verified NGOs (Tree-Nation)
+- **NGO Donation Hub**: Donate trees through verified NGOs with transparency scores
+- **Contribution Dashboard**: Track your personal impact (planted vs donated trees)
+- **Legal & Privacy**: Dedicated Terms of Service and Privacy Policy for secure usage
 - **State Leaderboard**: Rankings by oxygen self-sufficiency across Indian states
-- **User Contributions**: Track your personal environmental impact
 - **Transparent Methodology**: All formulas and assumptions clearly explained
 
 ## Tech Stack
