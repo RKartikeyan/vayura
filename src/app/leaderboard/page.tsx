@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
@@ -42,177 +44,179 @@ export default function LeaderboardPage() {
                     </div>
 
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50/50">
-                                <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Rank
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        State
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        Trees
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        O₂ Supply
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        O₂ Needed
-                                    </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                        2050 Target + Resilience
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-100">
-                                {loading && (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
+                                <thead className="bg-gray-50/50">
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">
-                                            Loading leaderboard...
-                                        </td>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                            Rank
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                            State
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                            Trees
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                            O₂ Supply
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                            O₂ Needed
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                            2050 Target + Resilience
+                                        </th>
                                     </tr>
-                                )}
-                                {!loading && entries.length === 0 && (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-4 py-6 text-center text-sm text-gray-500"
-                                        >
-                                            No leaderboard data yet. Start by planting or donating trees.
-                                        </td>
-                                    </tr>
-                                )}
-                                {!loading && entries.map((entry, idx) => {
-                                    const percentMet = entry.percentageMet || 0;
-                                    const isTop3 = idx < 3;
-                                    const badgeColor = idx === 0 ? 'bg-yellow-400' : idx === 1 ? 'bg-gray-300' : idx === 2 ? 'bg-orange-300' : '';
-
-                                    // Calculate tree needs for 2050 + RESILIENCE BUFFER
-                                    const cappedPercentMet = Math.min(Math.max(percentMet, 0), 100);
-
-                                    // India's population growth rate: ~1.1% per year (2024-2050 projection)
-                                    const currentYear = 2026;
-                                    const targetYear = 2050;
-                                    const yearsToProject = targetYear - currentYear;
-                                    const annualGrowthRate = 0.011; // 1.1% per year
-
-                                    // Project population to 2050: P_future = P_current * (1 + r)^t
-                                    const currentPopulation = entry.population || 0;
-                                    const projectedPopulation2050 = currentPopulation * Math.pow(1 + annualGrowthRate, yearsToProject);
-
-                                    // Calculate O2 needed for 2050 population (proportional to population)
-                                    const o2Needed2050 = currentPopulation > 0 ? (entry.o2Needed || 0) * (projectedPopulation2050 / currentPopulation) : (entry.o2Needed || 0);
-
-                                    // Calculate O2 DEFICIT: what we'll need minus what we currently have
-                                    const currentO2Supply = entry.o2Supply || 0;
-                                    const o2Deficit2050 = o2Needed2050 - currentO2Supply;
-
-                                    // Calculate base trees needed (deficit only)
-                                    const baseTreesNeeded = o2Deficit2050 > 0 ? Math.ceil(o2Deficit2050 / 110) : 0;
-
-                                    // Add RESILIENCE BUFFER: 25% extra for climate change, disasters, mortality
-                                    // Even self-sufficient states need this for forest health and adaptation
-                                    const resilienceMultiplier = 1.25; // 25% buffer
-
-                                    // For deficit states: add 25% to deficit
-                                    // For self-sufficient states: calculate 10% of total 2050 need as maintenance target
-                                    const treesWithResilience = baseTreesNeeded > 0
-                                        ? Math.ceil(baseTreesNeeded * resilienceMultiplier)
-                                        : Math.ceil(o2Needed2050 / 110 * 0.10); // 10% as climate resilience buffer for self-sufficient states
-
-                                    // Color code based on magnitude
-                                    const percentageColor = treesWithResilience <= 1000000 ? 'text-green-600' :
-                                        treesWithResilience <= 10000000 ? 'text-green-500' :
-                                            treesWithResilience <= 50000000 ? 'text-yellow-600' :
-                                                treesWithResilience <= 100000000 ? 'text-orange-600' :
-                                                    'text-red-600';
-
-                                    return (
-                                        <tr
-                                            key={entry.id}
-                                            className={`hover:bg-nature-50/60 ${isTop3 ? 'bg-yellow-50/30' : ''}`}
-                                        >
-                                            <td className="px-4 py-3 text-sm text-gray-900 font-semibold">
-                                                <div className="flex items-center gap-2">
-                                                    {isTop3 && (
-                                                        <span className={`inline-block w-2 h-2 rounded-full ${badgeColor}`}></span>
-                                                    )}
-                                                    <span>{entry.rank ?? '-'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-900">
-                                                <div className="font-semibold text-base">{entry.state}</div>
-                                                <div className="text-xs text-gray-500">
-                                                    Pop: {formatCompactNumber(entry.population || 0)}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                                                <span className={entry.totalTrees > 0 ? 'text-nature-600 font-semibold' : 'text-gray-400'}>
-                                                    {formatCompactNumber(entry.totalTrees || 0)}
-                                                </span>
-                                                {entry.totalTrees > 0 && (
-                                                    <div className="text-xs text-gray-500 mt-1 space-y-0.5">
-                                                        {entry.existingForestTrees && entry.existingForestTrees > 0 && (
-                                                            <div>Forest: {formatCompactNumber(entry.existingForestTrees)}</div>
-                                                        )}
-                                                        {(entry.totalTreesPlanted > 0 || entry.totalTreesDonated > 0) && (
-                                                            <div>
-                                                                User: {formatCompactNumber(entry.totalTreesPlanted)} planted + {formatCompactNumber(entry.totalTreesDonated)} donated
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                                                <span className={entry.o2Supply && entry.o2Supply > 0 ? 'text-green-600 font-semibold' : 'text-gray-400'}>
-                                                    {formatCompactNumber(entry.o2Supply || 0)}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-gray-900 text-right">
-                                                <span className="text-red-600 font-semibold">
-                                                    {formatCompactNumber(entry.o2Needed || 0)}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-right">
-                                                <div className={`text-lg font-bold ${percentageColor}`}>
-                                                    {formatCompactNumber(treesWithResilience)}
-                                                </div>
-                                                <div className="text-xs text-gray-500 mt-1">
-                                                    By 2050 (pop: {formatCompactNumber(Math.round(projectedPopulation2050))})
-                                                </div>
-                                                {baseTreesNeeded === 0 ? (
-                                                    <div className="text-xs text-green-600 font-medium mt-1">
-                                                        For climate resilience
-                                                    </div>
-                                                ) : cappedPercentMet >= 100 ? (
-                                                    <div className="text-xs text-yellow-600 font-medium mt-1">
-                                                        Future need + resilience
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-xs text-orange-600 font-medium mt-1">
-                                                        Critical need + buffer
-                                                    </div>
-                                                )}
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-100">
+                                    {loading && (
+                                        <tr>
+                                            <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">
+                                                Loading leaderboard...
                                             </td>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                    )}
+                                    {!loading && entries.length === 0 && (
+                                        <tr>
+                                            <td
+                                                colSpan={6}
+                                                className="px-4 py-6 text-center text-sm text-gray-500"
+                                            >
+                                                No leaderboard data yet. Start by planting or donating trees.
+                                            </td>
+                                        </tr>
+                                    )}
+                                    {!loading && entries.map((entry, idx) => {
+                                        const percentMet = entry.percentageMet || 0;
+                                        const isTop3 = idx < 3;
+                                        const badgeColor = idx === 0 ? 'bg-yellow-400' : idx === 1 ? 'bg-gray-300' : idx === 2 ? 'bg-orange-300' : '';
+
+                                        // Calculate tree needs for 2050 + RESILIENCE BUFFER
+                                        const cappedPercentMet = Math.min(Math.max(percentMet, 0), 100);
+
+                                        // India's population growth rate: ~1.1% per year (2024-2050 projection)
+                                        const currentYear = 2026;
+                                        const targetYear = 2050;
+                                        const yearsToProject = targetYear - currentYear;
+                                        const annualGrowthRate = 0.011; // 1.1% per year
+
+                                        // Project population to 2050: P_future = P_current * (1 + r)^t
+                                        const currentPopulation = entry.population || 0;
+                                        const projectedPopulation2050 = currentPopulation * Math.pow(1 + annualGrowthRate, yearsToProject);
+
+                                        // Calculate O2 needed for 2050 population (proportional to population)
+                                        const o2Needed2050 = currentPopulation > 0 ? (entry.o2Needed || 0) * (projectedPopulation2050 / currentPopulation) : (entry.o2Needed || 0);
+
+                                        // Calculate O2 DEFICIT: what we'll need minus what we currently have
+                                        const currentO2Supply = entry.o2Supply || 0;
+                                        const o2Deficit2050 = o2Needed2050 - currentO2Supply;
+
+                                        // Calculate base trees needed (deficit only)
+                                        const baseTreesNeeded = o2Deficit2050 > 0 ? Math.ceil(o2Deficit2050 / 110) : 0;
+
+                                        // Add RESILIENCE BUFFER: 25% extra for climate change, disasters, mortality
+                                        // Even self-sufficient states need this for forest health and adaptation
+                                        const resilienceMultiplier = 1.25; // 25% buffer
+
+                                        // For deficit states: add 25% to deficit
+                                        // For self-sufficient states: calculate 10% of total 2050 need as maintenance target
+                                        const treesWithResilience = baseTreesNeeded > 0
+                                            ? Math.ceil(baseTreesNeeded * resilienceMultiplier)
+                                            : Math.ceil(o2Needed2050 / 110 * 0.10); // 10% as climate resilience buffer for self-sufficient states
+
+                                        // Color code based on magnitude
+                                        const percentageColor = treesWithResilience <= 1000000 ? 'text-green-600' :
+                                            treesWithResilience <= 10000000 ? 'text-green-500' :
+                                                treesWithResilience <= 50000000 ? 'text-yellow-600' :
+                                                    treesWithResilience <= 100000000 ? 'text-orange-600' :
+                                                        'text-red-600';
+
+                                        return (
+                                            <tr
+                                                key={entry.id}
+                                                className={`hover:bg-nature-50/60 ${isTop3 ? 'bg-yellow-50/30' : ''}`}
+                                            >
+                                                <td className="px-4 py-3 text-sm text-gray-900 font-semibold">
+                                                    <div className="flex items-center gap-2">
+                                                        {isTop3 && (
+                                                            <span className={`inline-block w-2 h-2 rounded-full ${badgeColor}`}></span>
+                                                        )}
+                                                        <span>{entry.rank ?? '-'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-900">
+                                                    <div className="font-semibold text-base">{entry.state}</div>
+                                                    <div className="text-xs text-gray-500">
+                                                        Pop: {formatCompactNumber(entry.population || 0)}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                                                    <span className={entry.totalTrees > 0 ? 'text-nature-600 font-semibold' : 'text-gray-400'}>
+                                                        {formatCompactNumber(entry.totalTrees || 0)}
+                                                    </span>
+                                                    {entry.totalTrees > 0 && (
+                                                        <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                                                            {entry.existingForestTrees && entry.existingForestTrees > 0 && (
+                                                                <div>Forest: {formatCompactNumber(entry.existingForestTrees)}</div>
+                                                            )}
+                                                            {(entry.totalTreesPlanted > 0 || entry.totalTreesDonated > 0) && (
+                                                                <div>
+                                                                    User: {formatCompactNumber(entry.totalTreesPlanted)} planted + {formatCompactNumber(entry.totalTreesDonated)} donated
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                                                    <span className={entry.o2Supply && entry.o2Supply > 0 ? 'text-green-600 font-semibold' : 'text-gray-400'}>
+                                                        {formatCompactNumber(entry.o2Supply || 0)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                                                    <span className="text-red-600 font-semibold">
+                                                        {formatCompactNumber(entry.o2Needed || 0)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-right">
+                                                    <div className={`text-lg font-bold ${percentageColor}`}>
+                                                        {formatCompactNumber(treesWithResilience)}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        By 2050 (pop: {formatCompactNumber(Math.round(projectedPopulation2050))})
+                                                    </div>
+                                                    {baseTreesNeeded === 0 ? (
+                                                        <div className="text-xs text-green-600 font-medium mt-1">
+                                                            For climate resilience
+                                                        </div>
+                                                    ) : cappedPercentMet >= 100 ? (
+                                                        <div className="text-xs text-yellow-600 font-medium mt-1">
+                                                            Future need + resilience
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-xs text-orange-600 font-medium mt-1">
+                                                            Critical need + buffer
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div className="mt-8 space-y-3 bg-gray-50 p-5 rounded-lg border border-gray-200">
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-medium text-gray-900">
                                 How Rankings Work
                             </p>
-                            <button
-                                onClick={() => setShowDataSources(!showDataSources)}
+                            <Link
+                                href="/data-policy"
                                 className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center text-xs font-medium transition-colors"
                                 title="View Data Sources"
                             >
                                 i
-                            </button>
+                            </Link>
                         </div>
                         <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
                             <li><span className="text-red-600 font-semibold">O₂ Needed</span> = State's total oxygen demand based on population, AQI, soil quality, and disasters</li>
