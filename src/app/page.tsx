@@ -8,7 +8,7 @@ import { formatCompactNumber } from '@/lib/utils/helpers';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
 import { AuthModal } from '@/components/ui/auth-modal';
-import { ArrowRight, Leaf, Wind, Activity, BarChart3, TreeDeciduous, ShieldCheck, Globe, Sprout } from 'lucide-react';
+import { ArrowRight, Leaf, Wind, Activity, BarChart3, TreeDeciduous, ShieldCheck, Globe, Sprout, LayoutDashboard, Trophy, Calculator, Heart, User } from 'lucide-react';
 
 function HomeContent() {
   const { user, loading } = useAuth();
@@ -23,6 +23,13 @@ function HomeContent() {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
+
+  // Open AuthModal if query param exists
+  useEffect(() => {
+    if (searchParams.get('action') === 'login' && !user) {
+      setShowAuthModal(true);
+    }
+  }, [searchParams, user]);
 
   // Show auth modal if auth_required param is present
   useEffect(() => {
@@ -149,43 +156,70 @@ function HomeContent() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Why Vayura?
+                Explore Vayura
               </h2>
               <p className="text-gray-500 max-w-2xl mx-auto text-lg">
-                Comprehensive environmental intelligence driven by verifiable government data and advanced AI analysis.
+                Powerful tools to monitor the environment, track your impact, and take action.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
-                  icon: ShieldCheck,
+                  icon: LayoutDashboard,
                   color: 'blue',
-                  title: 'Verified Sources',
-                  desc: 'Data aggregated from CPCB, NDMA, and Census bureaus, ensuring decision-grade accuracy.'
+                  title: 'Live Dashboard',
+                  desc: 'Real-time environmental monitoring with AQI, soil health, and disaster alerts for every district.',
+                  link: '/dashboard'
                 },
                 {
-                  icon: Activity,
+                  icon: Trophy,
+                  color: 'yellow',
+                  title: 'Leaderboard',
+                  desc: 'Compete with other eco-warriors and see who is making the biggest difference across India.',
+                  link: '/leaderboard'
+                },
+                {
+                  icon: Calculator,
                   color: 'green',
-                  title: 'AI Analysis',
-                  desc: 'Advanced models calculate oxygen deficits and soil health scores tailored to local geography.'
+                  title: 'CO₂ Calculator',
+                  desc: 'Calculate your personal carbon footprint and understand your environmental impact.',
+                  link: '/calculator'
                 },
                 {
-                  icon: BarChart3,
+                  icon: Sprout,
+                  color: 'emerald',
+                  title: 'Plant a Tree',
+                  desc: 'Take direct action by planting native trees in deforested areas with verified tracking.',
+                  link: '/plant'
+                },
+                {
+                  icon: Heart,
+                  color: 'red',
+                  title: 'Donate Tree',
+                  desc: 'Support local verified NGOs to plant and maintain trees on your behalf.',
+                  link: '/donate'
+                },
+                {
+                  icon: User,
                   color: 'purple',
-                  title: 'Real Impact',
-                  desc: 'Track every tree planted and verify its long-term environmental contribution.'
+                  title: 'My Contributions',
+                  desc: 'Track your personal planting history, certificates, and impact milestones.',
+                  link: '/contribution'
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="group bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
+                <Link href={feature.link} key={idx} className="group bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+                  <div className={`absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                    <ArrowRight className={`w-5 h-5 text-${feature.color}-500 -rotate-45 group-hover:rotate-0 transition-transform duration-300`} />
+                  </div>
                   <div className={`w-14 h-14 bg-${feature.color}-50 rounded-2xl flex items-center justify-center text-${feature.color}-600 mb-6 group-hover:scale-110 transition-transform`}>
                     <feature.icon className="w-7 h-7" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">{feature.title}</h3>
                   <p className="text-gray-600 leading-relaxed">
                     {feature.desc}
                   </p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
